@@ -1,14 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Project</title>
-    <link rel="stylesheet" href="css/app.css">
-    <script src="https://kit.fontawesome.com/50950c4c6a.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="أداة بسيطة وعملية لإدارة المنتجات والمخزون.">
+  <title>StockFlow | إدارة المخزون</title>
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/script.js" defer></script>
 </head>
 <body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="StockFlow الصفحة الرئيسية">
+        <span class="brand-icon" aria-hidden="true">▦</span>
+        <span><strong>StockFlow</strong><small>إدارة المخزون</small></span>
+      </a>
+      <div class="side-label">القائمة الرئيسية</div>
+      <a class="nav-item active" href="#dashboard"><span aria-hidden="true">▦</span> لوحة التحكم</a>
+      <a class="nav-item" href="#inventory"><span aria-hidden="true">▤</span> المنتجات والمخزون</a>
+      <div class="sidebar-note">
+        <span class="note-icon" aria-hidden="true">✦</span>
+        <strong>مخزونك تحت السيطرة</strong>
+        <p>تابع الكميات، حدّث المنتجات، وتدارك النقص قبل نفاد المخزون.</p>
+      </div>
+      <div class="sidebar-footer"><span class="status-dot"></span> يعمل محلياً على جهازك</div>
+    </aside>
 
-    <script src="js/script.js"></script>
+    <main class="main-content" id="dashboard">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">مساحة العمل / المخزون</p>
+          <h1>لوحة إدارة المخزون</h1>
+          <p class="page-subtitle">نظرة واضحة على منتجات متجرك وحالة مخزونك.</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="today-chip" id="todayLabel">إدارة المنتجات</span>
+          <button class="button button-primary" id="openAddBtn" type="button"><span aria-hidden="true">＋</span> إضافة منتج</button>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="إحصائيات المخزون">
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-icon purple" aria-hidden="true">▤</span><span class="stat-caption">إجمالي المنتجات</span></div>
+          <div class="stat-value" id="totalProducts">0</div>
+          <div class="stat-foot">عدد الأصناف المسجلة</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-icon blue" aria-hidden="true">▦</span><span class="stat-caption">إجمالي الوحدات</span></div>
+          <div class="stat-value" id="totalUnits">0</div>
+          <div class="stat-foot">مجموع الكميات المتوفرة</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-icon amber" aria-hidden="true">⚠</span><span class="stat-caption">مخزون منخفض</span></div>
+          <div class="stat-value" id="lowStockCount">0</div>
+          <div class="stat-foot">منتجات عند الحد الأدنى أو أقل</div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span class="stat-icon green" aria-hidden="true">د.م</span><span class="stat-caption">قيمة المخزون</span></div>
+          <div class="stat-value stat-money" id="inventoryValue">0 د.م</div>
+          <div class="stat-foot">السعر × الكمية لكل منتج</div>
+        </article>
+      </section>
+
+      <section class="alert-banner" id="lowStockBanner" hidden>
+        <span class="alert-symbol" aria-hidden="true">!</span>
+        <div><strong id="lowStockBannerTitle">تنبيه المخزون</strong><p id="lowStockBannerText">توجد منتجات تحتاج إلى إعادة التزويد.</p></div>
+        <button class="text-button" id="showLowStockBtn" type="button">عرض المنتجات <span aria-hidden="true">←</span></button>
+      </section>
+
+      <section class="inventory-panel" id="inventory">
+        <div class="panel-heading">
+          <div>
+            <h2>المنتجات والمخزون</h2>
+            <p>أدر منتجاتك وحدّث كمياتها من مكان واحد.</p>
+          </div>
+          <button class="button button-secondary" id="exportBtn" type="button"><span aria-hidden="true">⇩</span> تصدير CSV</button>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box" for="searchInput">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="ابحث عن اسم المنتج..." autocomplete="off">
+            <kbd>بحث</kbd>
+          </label>
+          <div class="toolbar-filters">
+            <label class="sr-only" for="stockFilter">تصفية حسب حالة المخزون</label>
+            <select id="stockFilter">
+              <option value="all">كل الحالات</option>
+              <option value="in">متوفر</option>
+              <option value="low">مخزون منخفض</option>
+              <option value="out">نفد المخزون</option>
+              <option value="attention">يحتاج إلى الانتباه</option>
+            </select>
+            <label class="threshold-control" for="thresholdInput">حد التنبيه
+              <input id="thresholdInput" type="number" min="0" step="1" value="5" aria-label="حد تنبيه المخزون">
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">المنتج</th>
+                <th scope="col">سعر الوحدة</th>
+                <th scope="col">الكمية</th>
+                <th scope="col">قيمة المخزون</th>
+                <th scope="col">الحالة</th>
+                <th scope="col">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState" hidden>
+            <div class="empty-icon" aria-hidden="true">▤</div>
+            <h3 id="emptyTitle">لا توجد منتجات بعد</h3>
+            <p id="emptyText">أضف أول منتج لتبدأ في إدارة مخزون متجرك.</p>
+            <button class="button button-primary" id="emptyAddBtn" type="button">＋ إضافة أول منتج</button>
+          </div>
+        </div>
+        <div class="table-footer"><span id="resultsCount">عرض 0 منتجات</span><span>العملة: الدرهم المغربي (MAD)</span></div>
+      </section>
+      <footer class="page-footer">StockFlow <span>•</span> أداة خفيفة لإدارة المخزون باستخدام HTML وCSS وJavaScript</footer>
+    </main>
+  </div>
+
+  <dialog class="product-dialog" id="productDialog" aria-labelledby="dialogTitle">
+    <form id="productForm" novalidate>
+      <div class="dialog-heading">
+        <div><p class="eyebrow">بيانات المنتج</p><h2 id="dialogTitle">إضافة منتج جديد</h2></div>
+        <button class="icon-button" id="closeDialogBtn" type="button" aria-label="إغلاق النافذة">×</button>
+      </div>
+      <p class="dialog-description">أدخل معلومات المنتج. الحقول المعلّمة مطلوبة.</p>
+      <input id="productId" type="hidden">
+      <div class="form-field">
+        <label for="productName">اسم المنتج <span>*</span></label>
+        <input id="productName" name="productName" type="text" maxlength="80" placeholder="مثال: Laptop" required>
+        <small class="field-error" id="nameError"></small>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="productPrice">سعر الوحدة (د.م) <span>*</span></label>
+          <input id="productPrice" name="productPrice" type="number" min="0" step="0.01" placeholder="0.00" required>
+          <small class="field-error" id="priceError"></small>
+        </div>
+        <div class="form-field">
+          <label for="productQuantity">الكمية <span>*</span></label>
+          <input id="productQuantity" name="productQuantity" type="number" min="0" step="1" placeholder="0" required>
+          <small class="field-error" id="quantityError"></small>
+        </div>
+      </div>
+      <div class="form-notice" id="formNotice" role="alert" hidden></div>
+      <div class="dialog-actions">
+        <button class="button button-secondary" id="cancelDialogBtn" type="button">إلغاء</button>
+        <button class="button button-primary" id="saveProductBtn" type="submit">حفظ المنتج</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="confirm-content">
+      <span class="confirm-icon" aria-hidden="true">!</span>
+      <h2 id="confirmTitle">حذف المنتج؟</h2>
+      <p id="confirmText">هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.</p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" id="cancelDeleteBtn" type="button">إلغاء</button>
+        <button class="button button-danger" id="confirmDeleteBtn" type="button">حذف المنتج</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
