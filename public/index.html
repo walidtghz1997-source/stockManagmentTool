@@ -1,175 +1,367 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="أداة بسيطة وعملية لإدارة المنتجات والمخزون.">
-  <title>StockFlow | إدارة المخزون</title>
+  <meta name="description" content="StockFlow: a simple inventory dashboard for small local stores.">
+  <title>StockFlow | Stock management</title>
   <link rel="stylesheet" href="css/app.css">
-  <script src="js/script.js" defer></script>
 </head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="#" aria-label="StockFlow الصفحة الرئيسية">
-        <span class="brand-icon" aria-hidden="true">▦</span>
-        <span><strong>StockFlow</strong><small>إدارة المخزون</small></span>
+<body data-view="home">
+
+  <!-- Icon sprite: inline SVG so the app needs no external icon library -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></symbol>
+    <symbol id="i-xcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#home" aria-label="StockFlow">
+        <span class="brand-icon" aria-hidden="true"><svg class="icon"><use href="#i-package"/></svg></span>
+        <span class="brand-text"><strong>StockFlow</strong><small data-i18n="brand.tagline">Stock management</small></span>
       </a>
-      <div class="side-label">القائمة الرئيسية</div>
-      <a class="nav-item active" href="#dashboard"><span aria-hidden="true">▦</span> لوحة التحكم</a>
-      <a class="nav-item" href="#inventory"><span aria-hidden="true">▤</span> المنتجات والمخزون</a>
-      <div class="sidebar-note">
-        <span class="note-icon" aria-hidden="true">✦</span>
-        <strong>مخزونك تحت السيطرة</strong>
-        <p>تابع الكميات، حدّث المنتجات، وتدارك النقص قبل نفاد المخزون.</p>
-      </div>
-      <div class="sidebar-footer"><span class="status-dot"></span> يعمل محلياً على جهازك</div>
-    </aside>
 
-    <main class="main-content" id="dashboard">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">مساحة العمل / المخزون</p>
-          <h1>لوحة إدارة المخزون</h1>
-          <p class="page-subtitle">نظرة واضحة على منتجات متجرك وحالة مخزونك.</p>
-        </div>
-        <div class="topbar-actions">
-          <span class="today-chip" id="todayLabel">إدارة المنتجات</span>
-          <button class="button button-primary" id="openAddBtn" type="button"><span aria-hidden="true">＋</span> إضافة منتج</button>
-        </div>
-      </header>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav" data-i18n-aria-label="nav.toggle" aria-label="Toggle menu">
+        <svg class="icon"><use href="#i-menu"/></svg>
+      </button>
 
-      <section class="stats-grid" aria-label="إحصائيات المخزون">
-        <article class="stat-card">
-          <div class="stat-top"><span class="stat-icon purple" aria-hidden="true">▤</span><span class="stat-caption">إجمالي المنتجات</span></div>
-          <div class="stat-value" id="totalProducts">0</div>
-          <div class="stat-foot">عدد الأصناف المسجلة</div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-top"><span class="stat-icon blue" aria-hidden="true">▦</span><span class="stat-caption">إجمالي الوحدات</span></div>
-          <div class="stat-value" id="totalUnits">0</div>
-          <div class="stat-foot">مجموع الكميات المتوفرة</div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-top"><span class="stat-icon amber" aria-hidden="true">⚠</span><span class="stat-caption">مخزون منخفض</span></div>
-          <div class="stat-value" id="lowStockCount">0</div>
-          <div class="stat-foot">منتجات عند الحد الأدنى أو أقل</div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-top"><span class="stat-icon green" aria-hidden="true">د.م</span><span class="stat-caption">قيمة المخزون</span></div>
-          <div class="stat-value stat-money" id="inventoryValue">0 د.م</div>
-          <div class="stat-foot">السعر × الكمية لكل منتج</div>
-        </article>
+      <nav class="site-nav" id="siteNav" data-i18n-aria-label="nav.label" aria-label="Main navigation">
+        <a href="#home" data-nav="home" data-i18n="nav.home">Home</a>
+        <a href="#features" data-nav="features" data-i18n="nav.features">Features</a>
+        <a href="#app" data-nav="app" data-i18n="nav.inventory">Inventory</a>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" data-i18n-aria-label="lang.label" aria-label="Language">
+            <button type="button" data-lang="ar" lang="ar">العربية</button>
+            <button type="button" data-lang="en" lang="en">English</button>
+          </div>
+          <a class="button button-primary" href="#app"><span data-i18n="cta.open">Open Inventory</span></a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ===================== LANDING PAGE ===================== -->
+    <div id="homeView">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow-pill" data-i18n="hero.eyebrow">Built for small local stores</p>
+            <h1 data-i18n="hero.title">Know exactly what is on your shelves.</h1>
+            <p class="hero-text" data-i18n="hero.text">StockFlow helps you track products, quantities and prices, and warns you before an item runs out. No account and no server: it runs right in your browser.</p>
+            <div class="hero-buttons">
+              <a class="button button-primary button-large" href="#app">
+                <span data-i18n="cta.open">Open Inventory</span>
+                <svg class="icon flip-rtl"><use href="#i-arrow"/></svg>
+              </a>
+              <a class="button button-secondary button-large" href="#features" data-i18n="cta.features">See features</a>
+            </div>
+            <p class="hero-trust" data-i18n="hero.trust">Arabic and English · Works offline · Data stays on your device</p>
+          </div>
+
+          <div class="hero-visual">
+            <svg viewBox="0 0 480 380" role="img" aria-labelledby="heroArtTitle">
+              <title id="heroArtTitle" data-i18n="hero.art">Illustration of a store shelf full of stocked boxes</title>
+              <rect width="480" height="380" rx="28" fill="#ece9ff"/>
+              <!-- awning -->
+              <g>
+                <rect x="30" y="36" width="60" height="48" fill="#5b4bd6"/><rect x="90" y="36" width="60" height="48" fill="#fff"/>
+                <rect x="150" y="36" width="60" height="48" fill="#5b4bd6"/><rect x="210" y="36" width="60" height="48" fill="#fff"/>
+                <rect x="270" y="36" width="60" height="48" fill="#5b4bd6"/><rect x="330" y="36" width="60" height="48" fill="#fff"/>
+                <rect x="390" y="36" width="60" height="48" fill="#5b4bd6"/>
+                <circle cx="60" cy="84" r="30" fill="#5b4bd6"/><circle cx="120" cy="84" r="30" fill="#fff"/>
+                <circle cx="180" cy="84" r="30" fill="#5b4bd6"/><circle cx="240" cy="84" r="30" fill="#fff"/>
+                <circle cx="300" cy="84" r="30" fill="#5b4bd6"/><circle cx="360" cy="84" r="30" fill="#fff"/>
+                <circle cx="420" cy="84" r="30" fill="#5b4bd6"/>
+              </g>
+              <!-- shelf unit -->
+              <rect x="50" y="130" width="380" height="223" rx="10" fill="#fff" stroke="#d3cef7" stroke-width="2"/>
+              <g>
+                <rect x="70" y="147" width="46" height="58" rx="4" fill="#5b4bd6"/>
+                <rect x="124" y="161" width="40" height="44" rx="4" fill="#f5a524"/>
+                <rect x="172" y="143" width="52" height="62" rx="4" fill="#18875b"/>
+                <rect x="232" y="165" width="36" height="40" rx="4" fill="#c6404d"/>
+                <rect x="276" y="151" width="48" height="54" rx="4" fill="#3478cc"/>
+                <rect x="332" y="157" width="42" height="48" rx="4" fill="#f5a524"/>
+                <rect x="382" y="145" width="36" height="60" rx="4" fill="#5b4bd6"/>
+                <rect x="70" y="225" width="30" height="50" rx="8" fill="#3478cc"/>
+                <rect x="106" y="225" width="30" height="50" rx="8" fill="#3478cc"/>
+                <rect x="142" y="225" width="30" height="50" rx="8" fill="#3478cc"/>
+                <rect x="190" y="235" width="56" height="40" rx="4" fill="#c6404d"/>
+                <rect x="254" y="235" width="56" height="40" rx="4" fill="#c6404d"/>
+                <rect x="330" y="217" width="88" height="58" rx="4" fill="#18875b"/>
+                <rect x="70" y="311" width="100" height="34" rx="4" fill="#b79cf2"/>
+                <rect x="180" y="311" width="100" height="34" rx="4" fill="#8f84ee"/>
+                <rect x="290" y="315" width="60" height="30" rx="4" fill="#f5a524"/>
+                <rect x="360" y="311" width="58" height="34" rx="4" fill="#5b4bd6"/>
+              </g>
+              <g fill="#cfc9f5">
+                <rect x="56" y="205" width="368" height="8" rx="3"/>
+                <rect x="56" y="275" width="368" height="8" rx="3"/>
+                <rect x="56" y="345" width="368" height="8" rx="3"/>
+              </g>
+            </svg>
+            <span class="hero-chip chip-low"><svg class="icon"><use href="#i-alert"/></svg><span data-i18n="status.low">Low stock</span></span>
+            <span class="hero-chip chip-in"><svg class="icon"><use href="#i-check"/></svg><span data-i18n="status.in">In stock</span></span>
+          </div>
+        </div>
       </section>
 
-      <section class="alert-banner" id="lowStockBanner" hidden>
-        <span class="alert-symbol" aria-hidden="true">!</span>
-        <div><strong id="lowStockBannerTitle">تنبيه المخزون</strong><p id="lowStockBannerText">توجد منتجات تحتاج إلى إعادة التزويد.</p></div>
-        <button class="text-button" id="showLowStockBtn" type="button">عرض المنتجات <span aria-hidden="true">←</span></button>
+      <section class="features" id="features" aria-labelledby="featuresTitle">
+        <div class="container">
+          <div class="section-heading">
+            <h2 id="featuresTitle" data-i18n="features.title">Everything a small store needs</h2>
+            <p data-i18n="features.subtitle">Three simple benefits, no learning curve.</p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <span class="feature-icon"><svg class="icon"><use href="#i-chart"/></svg></span>
+              <h3 data-i18n="f1.title">See your stock at a glance</h3>
+              <p data-i18n="f1.text">Live cards show your products, total units and the full inventory value in MAD, updated after every change.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-icon amber"><svg class="icon"><use href="#i-bell"/></svg></span>
+              <h3 data-i18n="f2.title">Low-stock warnings</h3>
+              <p data-i18n="f2.text">Products at or below your threshold (5 units by default) are highlighted, and sold-out items are flagged separately.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-icon green"><svg class="icon"><use href="#i-database"/></svg></span>
+              <h3 data-i18n="f3.title">Saved in your browser</h3>
+              <p data-i18n="f3.text">Your inventory stays after a refresh or restart. Search, filter by category or status, and switch between Arabic and English.</p>
+            </article>
+          </div>
+          <div class="features-cta">
+            <a class="button button-primary button-large" href="#app"><span data-i18n="cta.open">Open Inventory</span><svg class="icon flip-rtl"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
       </section>
+    </div>
 
-      <section class="inventory-panel" id="inventory">
-        <div class="panel-heading">
+    <!-- ===================== INVENTORY APP ===================== -->
+    <div id="appView" hidden>
+      <div class="container app-container">
+        <div class="app-header">
           <div>
-            <h2>المنتجات والمخزون</h2>
-            <p>أدر منتجاتك وحدّث كمياتها من مكان واحد.</p>
+            <h1 data-i18n="app.title">Inventory dashboard</h1>
+            <p class="page-subtitle" data-i18n="app.subtitle">A clear view of your products and stock levels.</p>
           </div>
-          <button class="button button-secondary" id="exportBtn" type="button"><span aria-hidden="true">⇩</span> تصدير CSV</button>
+          <div class="app-header-actions">
+            <button class="button button-secondary" id="exportBtn" type="button"><svg class="icon"><use href="#i-download"/></svg><span data-i18n="btn.export">Export CSV</span></button>
+            <button class="button button-primary" id="openAddBtn" type="button"><svg class="icon"><use href="#i-plus"/></svg><span data-i18n="btn.add">Add product</span></button>
+          </div>
         </div>
 
-        <div class="toolbar">
-          <label class="search-box" for="searchInput">
-            <span aria-hidden="true">⌕</span>
-            <input id="searchInput" type="search" placeholder="ابحث عن اسم المنتج..." autocomplete="off">
-            <kbd>بحث</kbd>
-          </label>
-          <div class="toolbar-filters">
-            <label class="sr-only" for="stockFilter">تصفية حسب حالة المخزون</label>
-            <select id="stockFilter">
-              <option value="all">كل الحالات</option>
-              <option value="in">متوفر</option>
-              <option value="low">مخزون منخفض</option>
-              <option value="out">نفد المخزون</option>
-              <option value="attention">يحتاج إلى الانتباه</option>
-            </select>
-            <label class="threshold-control" for="thresholdInput">حد التنبيه
-              <input id="thresholdInput" type="number" min="0" step="1" value="5" aria-label="حد تنبيه المخزون">
+        <section class="stats-grid" data-i18n-aria-label="stats.label" aria-label="Inventory statistics">
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon purple"><svg class="icon"><use href="#i-package"/></svg></span><span class="stat-caption" data-i18n="stats.products">Total products</span></div>
+            <div class="stat-value" id="statProducts">0</div>
+            <div class="stat-foot" data-i18n="stats.productsFoot">Distinct items</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon blue"><svg class="icon"><use href="#i-layers"/></svg></span><span class="stat-caption" data-i18n="stats.units">Total units</span></div>
+            <div class="stat-value" id="statUnits">0</div>
+            <div class="stat-foot" data-i18n="stats.unitsFoot">Sum of all quantities</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon green"><svg class="icon"><use href="#i-chart"/></svg></span><span class="stat-caption" data-i18n="stats.value">Inventory value</span></div>
+            <div class="stat-value stat-money" id="statValue">0</div>
+            <div class="stat-foot" data-i18n="stats.valueFoot">Price × quantity</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon amber"><svg class="icon"><use href="#i-alert"/></svg></span><span class="stat-caption" data-i18n="stats.low">Low stock</span></div>
+            <div class="stat-value" id="statLow">0</div>
+            <div class="stat-foot" data-i18n="stats.lowFoot">At or below the threshold</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon red"><svg class="icon"><use href="#i-xcircle"/></svg></span><span class="stat-caption" data-i18n="stats.out">Out of stock</span></div>
+            <div class="stat-value" id="statOut">0</div>
+            <div class="stat-foot" data-i18n="stats.outFoot">Quantity is zero</div>
+          </article>
+        </section>
+
+        <section class="alert-banner" id="alertBanner" role="status" hidden>
+          <span class="alert-symbol"><svg class="icon"><use href="#i-alert"/></svg></span>
+          <div><strong id="alertTitle"></strong><p id="alertText"></p></div>
+          <button class="text-button" id="showAttentionBtn" type="button"><span data-i18n="banner.show">Show them</span></button>
+        </section>
+
+        <section class="panel" id="inventory" aria-labelledby="inventoryTitle">
+          <div class="panel-heading">
+            <div>
+              <h2 id="inventoryTitle" data-i18n="inv.title">Products and stock</h2>
+              <p data-i18n="inv.subtitle">Manage your products and update quantities in one place.</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-box" for="searchInput">
+              <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+              <span class="sr-only" data-i18n="search.label">Search products by name</span>
+              <input id="searchInput" type="search" data-i18n-placeholder="search.placeholder" placeholder="Search by product name…" autocomplete="off">
             </label>
+            <div class="toolbar-filters">
+              <div class="select-field">
+                <label for="categoryFilter" data-i18n="filter.category">Category</label>
+                <select id="categoryFilter"></select>
+              </div>
+              <div class="select-field">
+                <label for="statusFilter" data-i18n="filter.status">Stock status</label>
+                <select id="statusFilter">
+                  <option value="all" data-i18n="filter.statusAll">All statuses</option>
+                  <option value="in" data-i18n="status.in">In stock</option>
+                  <option value="low" data-i18n="status.low">Low stock</option>
+                  <option value="out" data-i18n="status.out">Out of stock</option>
+                  <option value="attention" data-i18n="filter.attention">Needs attention</option>
+                </select>
+              </div>
+              <div class="select-field threshold-field">
+                <label for="thresholdInput" data-i18n="threshold.label">Low-stock threshold</label>
+                <input id="thresholdInput" type="number" min="0" step="1" inputmode="numeric">
+              </div>
+              <button class="button button-secondary" id="clearFiltersBtn" type="button" data-i18n="filter.clear">Clear filters</button>
+            </div>
           </div>
-        </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">المنتج</th>
-                <th scope="col">سعر الوحدة</th>
-                <th scope="col">الكمية</th>
-                <th scope="col">قيمة المخزون</th>
-                <th scope="col">الحالة</th>
-                <th scope="col">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="productsTableBody"></tbody>
-          </table>
-          <div class="empty-state" id="emptyState" hidden>
-            <div class="empty-icon" aria-hidden="true">▤</div>
-            <h3 id="emptyTitle">لا توجد منتجات بعد</h3>
-            <p id="emptyText">أضف أول منتج لتبدأ في إدارة مخزون متجرك.</p>
-            <button class="button button-primary" id="emptyAddBtn" type="button">＋ إضافة أول منتج</button>
+          <div class="table-wrap" tabindex="0" data-i18n-aria-label="table.label" aria-label="Products table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="th.product">Product</th>
+                  <th scope="col" data-i18n="th.category">Category</th>
+                  <th scope="col" class="num" data-i18n="th.price">Unit price</th>
+                  <th scope="col" class="num" data-i18n="th.quantity">Quantity</th>
+                  <th scope="col" class="num" data-i18n="th.value">Stock value</th>
+                  <th scope="col" data-i18n="th.status">Status</th>
+                  <th scope="col" data-i18n="th.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" hidden>
+              <div class="empty-icon"><svg class="icon"><use href="#i-package"/></svg></div>
+              <h3 id="emptyTitle"></h3>
+              <p id="emptyText"></p>
+              <div class="empty-actions" id="emptyActions">
+                <button class="button button-primary" id="emptyAddBtn" type="button"><svg class="icon"><use href="#i-plus"/></svg><span data-i18n="empty.add">Add first product</span></button>
+                <button class="button button-secondary" id="emptySampleBtn" type="button" data-i18n="data.sample">Load sample data</button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="table-footer"><span id="resultsCount">عرض 0 منتجات</span><span>العملة: الدرهم المغربي (MAD)</span></div>
-      </section>
-      <footer class="page-footer">StockFlow <span>•</span> أداة خفيفة لإدارة المخزون باستخدام HTML وCSS وJavaScript</footer>
-    </main>
-  </div>
 
-  <dialog class="product-dialog" id="productDialog" aria-labelledby="dialogTitle">
+          <div class="table-footer">
+            <span id="resultsCount" aria-live="polite"></span>
+            <span data-i18n="data.currency">Currency: Moroccan dirham (MAD)</span>
+          </div>
+        </section>
+
+        <section class="data-tools" aria-labelledby="dataToolsTitle">
+          <div>
+            <h2 id="dataToolsTitle" data-i18n="data.title">Data tools</h2>
+            <p data-i18n="data.note">Your inventory is stored only in this browser. It is not synced between devices.</p>
+          </div>
+          <div class="data-tools-actions">
+            <button class="button button-secondary" id="sampleBtn" type="button"><svg class="icon"><use href="#i-refresh"/></svg><span data-i18n="data.sample">Load sample data</span></button>
+            <button class="button button-danger-outline" id="resetBtn" type="button"><svg class="icon"><use href="#i-trash"/></svg><span data-i18n="data.reset">Reset inventory</span></button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-icon small" aria-hidden="true"><svg class="icon"><use href="#i-package"/></svg></span>
+        <div><strong>StockFlow</strong><p data-i18n="footer.text">A simple inventory tool built with HTML, CSS and JavaScript.</p></div>
+      </div>
+      <nav class="footer-links" data-i18n-aria-label="footer.nav" aria-label="Footer navigation">
+        <a href="#home" data-i18n="nav.home">Home</a>
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#app" data-i18n="nav.inventory">Inventory</a>
+      </nav>
+      <p class="footer-note" data-i18n="footer.note">Data is stored only in this browser (localStorage).</p>
+    </div>
+  </footer>
+
+  <!-- Product dialog -->
+  <dialog class="dialog" id="productDialog" aria-labelledby="dialogTitle">
     <form id="productForm" novalidate>
       <div class="dialog-heading">
-        <div><p class="eyebrow">بيانات المنتج</p><h2 id="dialogTitle">إضافة منتج جديد</h2></div>
-        <button class="icon-button" id="closeDialogBtn" type="button" aria-label="إغلاق النافذة">×</button>
+        <div><p class="eyebrow" data-i18n="form.eyebrow">Product details</p><h2 id="dialogTitle"></h2></div>
+        <button class="icon-button" id="closeDialogBtn" type="button" data-i18n-aria-label="form.close" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button>
       </div>
-      <p class="dialog-description">أدخل معلومات المنتج. الحقول المعلّمة مطلوبة.</p>
+      <p class="dialog-description" data-i18n="form.desc">Fields marked * are required.</p>
       <input id="productId" type="hidden">
+
       <div class="form-field">
-        <label for="productName">اسم المنتج <span>*</span></label>
-        <input id="productName" name="productName" type="text" maxlength="80" placeholder="مثال: Laptop" required>
+        <label for="productName"><span data-i18n="form.name">Product name</span> <span class="req" aria-hidden="true">*</span></label>
+        <input id="productName" type="text" maxlength="80" data-i18n-placeholder="form.namePh" placeholder="e.g. Olive oil 1L" required aria-describedby="nameError" autocomplete="off">
         <small class="field-error" id="nameError"></small>
       </div>
+
+      <div class="form-field">
+        <label for="productCategory"><span data-i18n="form.category">Category</span> <span class="req" aria-hidden="true">*</span></label>
+        <select id="productCategory" required aria-describedby="categoryError"></select>
+        <input id="customCategory" type="text" maxlength="40" data-i18n-placeholder="form.customCategory" placeholder="New category name" hidden aria-describedby="categoryError" data-i18n-aria-label="form.customCategory" aria-label="New category name">
+        <small class="field-error" id="categoryError"></small>
+      </div>
+
       <div class="form-grid">
         <div class="form-field">
-          <label for="productPrice">سعر الوحدة (د.م) <span>*</span></label>
-          <input id="productPrice" name="productPrice" type="number" min="0" step="0.01" placeholder="0.00" required>
+          <label for="productPrice"><span data-i18n="form.price">Unit price (MAD)</span> <span class="req" aria-hidden="true">*</span></label>
+          <input id="productPrice" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" required aria-describedby="priceError">
           <small class="field-error" id="priceError"></small>
         </div>
         <div class="form-field">
-          <label for="productQuantity">الكمية <span>*</span></label>
-          <input id="productQuantity" name="productQuantity" type="number" min="0" step="1" placeholder="0" required>
+          <label for="productQuantity"><span data-i18n="form.quantity">Quantity</span> <span class="req" aria-hidden="true">*</span></label>
+          <input id="productQuantity" type="number" min="0" step="1" placeholder="0" inputmode="numeric" required aria-describedby="quantityError">
           <small class="field-error" id="quantityError"></small>
         </div>
       </div>
+
       <div class="form-notice" id="formNotice" role="alert" hidden></div>
       <div class="dialog-actions">
-        <button class="button button-secondary" id="cancelDialogBtn" type="button">إلغاء</button>
-        <button class="button button-primary" id="saveProductBtn" type="submit">حفظ المنتج</button>
+        <button class="button button-secondary" id="cancelDialogBtn" type="button" data-i18n="form.cancel">Cancel</button>
+        <button class="button button-primary" id="saveProductBtn" type="submit"></button>
       </div>
     </form>
   </dialog>
 
-  <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+  <!-- Generic confirmation dialog (delete, reset, load sample) -->
+  <dialog class="dialog dialog-small" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText">
     <div class="confirm-content">
-      <span class="confirm-icon" aria-hidden="true">!</span>
-      <h2 id="confirmTitle">حذف المنتج؟</h2>
-      <p id="confirmText">هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.</p>
-      <div class="dialog-actions">
-        <button class="button button-secondary" id="cancelDeleteBtn" type="button">إلغاء</button>
-        <button class="button button-danger" id="confirmDeleteBtn" type="button">حذف المنتج</button>
+      <span class="confirm-icon"><svg class="icon"><use href="#i-alert"/></svg></span>
+      <h2 id="confirmTitle"></h2>
+      <p id="confirmText"></p>
+      <div class="dialog-actions center">
+        <button class="button button-secondary" id="confirmCancelBtn" type="button" data-i18n="confirm.cancel">Cancel</button>
+        <button class="button button-danger" id="confirmOkBtn" type="button"></button>
       </div>
     </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/script.js"></script>
 </body>
 </html>
