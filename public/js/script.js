@@ -124,7 +124,9 @@
       "toast.saveFail": "Could not save to this browser. Check your storage settings.",
       "toast.reset": "Inventory has been reset.", "toast.sample": "Sample data loaded.",
       "toast.corrupt": "Saved data could not be read, so the inventory started empty. A backup copy was kept.",
-      "csv.id": "ID"
+      "csv.id": "ID",
+
+      "err.nameMustContainLetter": "The product name must contain at least one letter."
     },
 
     ar: {
@@ -225,7 +227,8 @@
       "toast.saveFail": "تعذر الحفظ في هذا المتصفح. تحقق من إعدادات التخزين.",
       "toast.reset": "تمت إعادة ضبط المخزون.", "toast.sample": "تم تحميل البيانات التجريبية.",
       "toast.corrupt": "تعذرت قراءة البيانات المحفوظة، لذلك بدأ المخزون فارغاً. تم الاحتفاظ بنسخة احتياطية.",
-      "csv.id": "المعرّف"
+      "csv.id": "المعرّف",
+      "err.nameMustContainLetter": "يجب أن يحتوي اسم المنتج على حرف واحد على الأقل."
     }
   };
 
@@ -400,7 +403,9 @@
     let category = input.category === NEW_CATEGORY_VALUE ? input.customCategory.trim() : input.category;
 
     if (!name) errors.name = { key: "err.nameRequired" };
-    else if (name.length > MAX_NAME) errors.name = { key: "err.nameLong", params: { max: MAX_NAME } };
+     else if (!/\p{L}/u.test(name)) {
+  errors.name = { key: "err.nameMustContainLetter" };
+     }else if (name.length > MAX_NAME) errors.name = { key: "err.nameLong", params: { max: MAX_NAME } };
     else {
       const duplicate = state.products.some((p) => p.id !== editingId && p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
       if (duplicate) errors.name = { key: "err.nameDuplicate" };
@@ -702,7 +707,8 @@
         $("#formNotice").hidden = false;
         return;
       }
-    } else {
+    }
+     else {
       addProduct(values);
     }
     saveProducts();
