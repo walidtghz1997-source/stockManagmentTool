@@ -94,7 +94,7 @@
 
       "err.nameRequired": "Please enter the product name.",
       "err.nameLong": "The name must be {max} characters or fewer.",
-      "err.nameDuplicate": "A product with this name already exists. Edit it instead of adding it again.",
+      "err.nameDuplicate": "Another product with this name and unit price already exists. Choose a different price or edit that product.",
       "err.categoryRequired": "Please choose or enter a category.",
       "err.categoryLong": "The category must be {max} characters or fewer.",
       "err.priceInvalid": "Enter a valid price of 0 or more.",
@@ -115,6 +115,7 @@
       "confirm.sampleBtn": "Replace with sample",
 
       "toast.added": "Product added successfully.",
+      "toast.merged": "Existing product found at the same price; quantity updated.",
       "toast.updated": "Product updated successfully.",
       "toast.deleted": "“{name}” was deleted.",
       "toast.qtyUp": "Quantity increased.", "toast.qtyDown": "Quantity decreased.",
@@ -197,7 +198,7 @@
 
       "err.nameRequired": "يرجى إدخال اسم المنتج.",
       "err.nameLong": "يجب ألا يتجاوز الاسم {max} حرفاً.",
-      "err.nameDuplicate": "يوجد منتج بهذا الاسم بالفعل. عدّله بدلاً من إضافته مرة أخرى.",
+      "err.nameDuplicate": "يوجد منتج آخر بالاسم والسعر نفسيهما. اختر سعراً مختلفاً أو عدّل ذلك المنتج.",
       "err.categoryRequired": "يرجى اختيار فئة أو كتابتها.",
       "err.categoryLong": "يجب ألا تتجاوز الفئة {max} حرفاً.",
       "err.priceInvalid": "أدخل سعراً صحيحاً يساوي 0 أو أكثر.",
@@ -218,6 +219,7 @@
       "confirm.sampleBtn": "الاستبدال بالتجريبية",
 
       "toast.added": "تمت إضافة المنتج بنجاح.",
+      "toast.merged": "المنتج موجود بالسعر نفسه؛ تم تحديث الكمية.",
       "toast.updated": "تم تحديث المنتج بنجاح.",
       "toast.deleted": "تم حذف «{name}».",
       "toast.qtyUp": "تمت زيادة الكمية.", "toast.qtyDown": "تم إنقاص الكمية.",
@@ -376,8 +378,23 @@
     return match || text.trim();
   }
 
+  /** Adds stock to an existing record only when name and unit price both match. */
   function addProduct(values) {
+    const normalizedName = values.name.trim().toLocaleLowerCase();
+    const priceCents = Math.round(values.price * 100);
+    const existing = state.products.find((product) =>
+      product.name.trim().toLocaleLowerCase() === normalizedName &&
+      Math.round(product.price * 100) === priceCents
+    );
+
+    if (existing) {
+      if (existing.quantity + values.quantity > MAX_AMOUNT) return "overflow";
+      existing.quantity += values.quantity;
+      return "merged";
+    }
+
     state.products.unshift({ id: createId(), ...values });
+    return "added";
   }
 
   function updateProduct(id, values) {
@@ -403,13 +420,8 @@
     let category = input.category === NEW_CATEGORY_VALUE ? input.customCategory.trim() : input.category;
 
     if (!name) errors.name = { key: "err.nameRequired" };
-     else if (!/\p{L}/u.test(name)) {
-  errors.name = { key: "err.nameMustContainLetter" };
-     }else if (name.length > MAX_NAME) errors.name = { key: "err.nameLong", params: { max: MAX_NAME } };
-    else {
-      const duplicate = state.products.some((p) => p.id !== editingId && p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-      if (duplicate) errors.name = { key: "err.nameDuplicate" };
-    }
+    else if (!/\p{L}/u.test(name)) errors.name = { key: "err.nameMustContainLetter" };
+    else if (name.length > MAX_NAME) errors.name = { key: "err.nameLong", params: { max: MAX_NAME } };
 
     if (!category) errors.category = { key: "err.categoryRequired" };
     else if (category.length > MAX_CATEGORY) errors.category = { key: "err.categoryLong", params: { max: MAX_CATEGORY } };
@@ -417,6 +429,14 @@
 
     const price = Number(priceText);
     if (priceText === "" || !Number.isFinite(price) || price < 0 || price > MAX_AMOUNT) errors.price = { key: "err.priceInvalid" };
+    else if (editingId && !errors.name) {
+      const duplicate = state.products.some((p) =>
+        p.id !== editingId &&
+        p.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase() &&
+        Math.round(p.price * 100) === Math.round(price * 100)
+      );
+      if (duplicate) errors.name = { key: "err.nameDuplicate" };
+    }
 
     const quantity = Number(quantityText);
     if (quantityText === "" || !Number.isInteger(quantity) || quantity < 0 || quantity > MAX_AMOUNT) errors.quantity = { key: "err.quantityInvalid" };
@@ -562,9 +582,55 @@
     return row;
   }
 
+  function createProductCard(product) {
+    const status = getStockStatus(product);
+    const card = createEl("article", `product-card ${status === "low" ? "row-low" : status === "out" ? "row-out" : ""}`);
+    const heading = createEl("div", "product-card-heading");
+    const titleGroup = createEl("div", "product-card-title");
+    titleGroup.appendChild(createEl("h3", "product-name", product.name));
+    titleGroup.appendChild(createEl("span", "category-tag", categoryLabel(product.category)));
+    heading.appendChild(titleGroup);
+
+    const badge = createEl("span", `stock-badge ${status}`);
+    badge.append(createIcon(status === "in" ? "check" : status === "low" ? "alert" : "xcircle"), document.createTextNode(t(`status.${status}`)));
+    heading.appendChild(badge);
+    card.appendChild(heading);
+
+    const details = createEl("dl", "product-card-details");
+    const addDetail = (labelKey, value, valueClass = "") => {
+      const item = createEl("div", "product-card-detail");
+      item.appendChild(createEl("dt", "", t(labelKey)));
+      item.appendChild(createEl("dd", valueClass, value));
+      details.appendChild(item);
+    };
+    addDetail("th.price", formatMoney(product.price), "num");
+    addDetail("th.value", formatMoney(Math.round(product.price * 100) * product.quantity / 100), "num");
+    card.appendChild(details);
+
+    const quantityRow = createEl("div", "product-card-quantity");
+    quantityRow.appendChild(createEl("span", "product-card-label", t("th.quantity")));
+    const stepper = createEl("div", "stock-stepper");
+    stepper.append(
+      createActionButton("", "dec", product.id, t("row.dec", { name: product.name }), "minus", product.quantity === 0),
+      createEl("span", "stock-number", formatNumber(product.quantity)),
+      createActionButton("", "inc", product.id, t("row.inc", { name: product.name }), "plus")
+    );
+    quantityRow.appendChild(stepper);
+    card.appendChild(quantityRow);
+
+    const actions = createEl("div", "product-card-actions");
+    actions.append(
+      createActionButton("icon-button", "edit", product.id, t("row.edit", { name: product.name }), "edit"),
+      createActionButton("icon-button delete", "delete", product.id, t("row.delete", { name: product.name }), "trash")
+    );
+    card.appendChild(actions);
+    return card;
+  }
+
   function renderTable() {
     const visible = getVisibleProducts();
     $("#productsBody").replaceChildren(...visible.map(createProductRow));
+    $("#productCards").replaceChildren(...visible.map(createProductCard));
 
     const hasProducts = state.products.length > 0;
     $("#emptyState").hidden = visible.length > 0;
@@ -701,20 +767,25 @@
 
     if (Object.keys(errors).length > 0) { showFormErrors(errors); return; } // invalid form never touches inventory
 
+    let result = "updated";
     if (editingId) {
       if (!updateProduct(editingId, values)) {
         $("#formNotice").textContent = t("err.notFound");
         $("#formNotice").hidden = false;
         return;
       }
-    }
-     else {
-      addProduct(values);
+    } else {
+      result = addProduct(values);
+      if (result === "overflow") {
+        $("#formNotice").textContent = t("err.quantityInvalid");
+        $("#formNotice").hidden = false;
+        return;
+      }
     }
     saveProducts();
     closeProductDialog();
     renderAll();
-    showToast(t(editingId ? "toast.updated" : "toast.added"));
+    showToast(t(result === "merged" ? "toast.merged" : result === "updated" ? "toast.updated" : "toast.added"));
   }
 
   function changeQuantity(id, amount) {
@@ -869,7 +940,8 @@
     $("#closeDialogBtn").addEventListener("click", closeProductDialog);
     $("#cancelDialogBtn").addEventListener("click", closeProductDialog);
     $("#productCategory").addEventListener("change", () => { toggleCustomCategory(); if (!$("#customCategory").hidden) $("#customCategory").focus(); });
-    $("#productsBody").addEventListener("click", handleTableClick); // event delegation
+    $("#productsBody").addEventListener("click", handleTableClick); // table event delegation
+    $("#productCards").addEventListener("click", handleTableClick); // mobile card event delegation
 
     $("#searchInput").addEventListener("input", (e) => { state.filters.search = e.target.value; renderTable(); });
     $("#categoryFilter").addEventListener("change", (e) => { state.filters.category = e.target.value; renderTable(); });
